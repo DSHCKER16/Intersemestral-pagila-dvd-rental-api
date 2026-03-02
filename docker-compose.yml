@@ -1,9 +1,90 @@
-# Docker Compose Configuration
-# Orquestación de PostgreSQL + API (+5 puntos extra)
+version: '3.8'
 
-# TODO: Implementar docker-compose con:
-# - Servicio PostgreSQL con base Pagila
-# - Servicio API FastAPI
-# - Volúmenes para persistencia
-# - Networks para comunicación
-# - Init scripts para triggers/indexes
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: pagila-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: pagila
+      POSTGRES_INITDB_ARGS: "-E UTF8"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-pagila.sh:/docker-entrypoint-initdb.d/01-init-pagila.sh
+      - ./sql/disparadores.sql:/docker-entrypoint-initdb.d/02-disparadores.sql
+      - ./sql/indices.sql:/docker-entrypoint-initdb.d/03-indices.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - pagila-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d pagila"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pagila-api
+    restart: unless-stopped
+    environment:
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      DATABASE_NAME: pagila
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: postgres
+      APP_HOST: 0.0.0.0
+      APP_PORT: 8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app/app
+      - ./sql:/app/sql
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - pagila-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pagila-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@pagila.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - db
+    networks:
+      - pagila-network
+    profiles:
+      - tools
+
+networks:
+  pagila-network:
+    driver: bridge
+    name: pagila-network
+
+volumes:
+  postgres_data:
+    driver: local
+    name: pagila-postgres-data
+  pgadmin_data:
+    driver: local
+    name: pagila-pgadmin-data
