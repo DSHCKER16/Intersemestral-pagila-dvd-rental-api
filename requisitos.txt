@@ -1,0 +1,9 @@
+# Dependencias de Python
+# TODO: Agregar versiones después de la implementación
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+python-dotenv
+pydantic
+pydantic-settings

@@ -1,0 +1,9 @@
+# Docker Compose Configuration
+# Orquestación de PostgreSQL + API (+5 puntos extra)
+
+# TODO: Implementar docker-compose con:
+# - Servicio PostgreSQL con base Pagila
+# - Servicio API FastAPI
+# - Volúmenes para persistencia
+# - Networks para comunicación
+# - Init scripts para triggers/indexes
