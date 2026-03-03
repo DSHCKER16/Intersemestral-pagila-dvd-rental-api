@@ -1,17 +1,30 @@
--- PGBENCH SCRIPT A: Hot Inventory Contention
+\set inventario_caliente 1
+\set cliente_aleatorio random(1, 599)
+\set staff_aleatorio random(1, 2)
 
--- Propósito: Simular contención cuando múltiples clientes intentan rentar
--- el mismo inventory_id simultáneamente
+BEGIN;
 
--- Expectativa: Solo una transacción debe concretarse, el resto debe fallar
--- o esperar. Al final NO debe haber rentas activas duplicadas.
+SELECT inventory_id 
+FROM inventory 
+WHERE inventory_id = :inventario_caliente 
+  AND inventory_id NOT IN (
+    SELECT inventory_id 
+    FROM rental 
+    WHERE return_date IS NULL
+  )
+FOR UPDATE;
 
+INSERT INTO rental (rental_date, inventory_id, customer_id, staff_id, last_update)
+SELECT NOW(), :inventario_caliente, :cliente_aleatorio, :staff_aleatorio, NOW()
+WHERE EXISTS (
+    SELECT 1 
+    FROM inventory 
+    WHERE inventory_id = :inventario_caliente 
+      AND inventory_id NOT IN (
+        SELECT inventory_id 
+        FROM rental 
+        WHERE return_date IS NULL
+      )
+);
 
--- TODO: Implementar script que:
--- 1. Selecciona un inventory_id específico (hot item)
--- 2. Verifica disponibilidad (return_date IS NULL check)
--- 3. Inserta nueva renta
--- Todo dentro de una transacción
-
--- Ejemplo de ejecución:
--- pgbench -d pagila -c 20 -j 4 -T 30 -f scripts/pgbench/scriptA_hot_inventory.sql
+COMMIT;
