@@ -1,17 +1,16 @@
--- PGBENCH SCRIPT B: Deadlock Reproducible
+\set cliente_a random(1, 299)
+\set cliente_b random(300, 599)
+\set monto_aleatorio random(1, 10)
 
--- Propósito: Provocar un deadlock real bajo carga concurrente
+BEGIN;
 
--- Fase 1: Script que GENERA deadlocks
--- Fase 2: Script CORREGIDO que elimina deadlocks mediante orden de locks
+UPDATE customer SET last_update = NOW() WHERE customer_id = :cliente_a;
 
+SELECT pg_sleep(0.001);
 
--- TODO: Implementar script que provoca deadlock:
--- Ejemplo: Transacción A bloquea tabla X luego Y
---          Transacción B bloquea tabla Y luego X
--- -> Resultado: deadlock
+UPDATE customer SET last_update = NOW() WHERE customer_id = :cliente_b;
 
--- TODO: Implementar versión corregida con orden consistente de locks
+INSERT INTO payment (customer_id, staff_id, rental_id, amount, payment_date)
+VALUES (:cliente_a, 1, NULL, :monto_aleatorio, NOW());
 
--- Ejemplo de ejecución:
--- pgbench -d pagila -c 20 -j 4 -T 30 -f scripts/pgbench/scriptB_deadlock.sql
+COMMIT;
