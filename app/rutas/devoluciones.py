@@ -1,18 +1,19 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from app.base_datos import obtener_db
-from app.esquemas import DevolucionRespuesta, ErrorRespuesta
-from app.modelos import Rental
+from fastapi import APIRouter, status
+from app.base_datos import get_connection
+from app.esquemas import DevolucionRespuesta
+from app.servicios.servicio_devoluciones import registrar_devolucion_read_committed
 
 router = APIRouter()
 
 
 @router.post("/{rental_id}", response_model=DevolucionRespuesta, status_code=status.HTTP_200_OK)
-async def registrar_devolucion(
-    rental_id: int,
-    db: Session = Depends(obtener_db)
-):
-    raise HTTPException(
-        status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail="Endpoint en implementación"
+async def registrar_devolucion(rental_id: int):
+    with get_connection() as conn:
+        resultado = registrar_devolucion_read_committed(conn, rental_id)
+
+    mensaje = "Devolución registrada." if not resultado.already_returned else "La renta ya había sido devuelta."
+    return DevolucionRespuesta(
+        rental_id=resultado.rental_id,
+        return_date=resultado.return_date,
+        mensaje=mensaje,
     )
