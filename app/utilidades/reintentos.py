@@ -5,29 +5,40 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.exc import DBAPIError
 
 T = TypeVar("T")
-TX_ERRORS = {"40P01", "40001"}
+CODIGOS_ERROR_TX = {"40P01", "40001"}
 
-def execute_isolated_tx(conn: Connection, func: Callable[[Connection], T], iso_level: str | None = None) -> T:
+
+def execute_isolated_tx(conn: Connection, func: Callable[[Connection], T], nivel_aislamiento: str | None = None) -> T:
     tx = conn.begin()
     try:
-        if iso_level:
-            conn.execute(text(iso_level))
-        res = func(conn)
+        if nivel_aislamiento:
+            conn.execute(text(nivel_aislamiento))
+        resultado = func(conn)
         tx.commit()
-        return res
+        return resultado
     except Exception:
         tx.rollback()
         raise
 
-def retry_tx(conn: Connection, func: Callable[[Connection], T], iso_level: str | None = None, max_tries: int = 5, backoff: float = 0.05) -> T:
-    tries = 0
+
+def retry_tx(
+    conn: Connection, 
+    func: Callable[[Connection], T], 
+    nivel_aislamiento: str | None = None, 
+    max_intentos: int = 5, 
+    backoff: float = 0.05
+) -> T:
+    intentos = 0
     while True:
         try:
-            return execute_isolated_tx(conn, func, iso_level)
+            return execute_isolated_tx(conn, func, nivel_aislamiento)
         except DBAPIError as e:
-            origin = getattr(e, "orig", None)
-            code = getattr(origin, "pgcode", None) or getattr(origin, "sqlstate", None)
-            if code not in TX_ERRORS or tries >= max_tries:
+            origen = getattr(e, "orig", None)
+            codigo = getattr(origen, "pgcode", None) or getattr(origen, "sqlstate", None)
+            
+            if codigo not in CODIGOS_ERROR_TX or intentos >= max_intentos:
                 raise
-            time.sleep(backoff * (2 ** tries))
-            tries += 1
+            
+            tiempo_espera = backoff * (2 ** intentos)
+            time.sleep(tiempo_espera)
+            intentos += 1
