@@ -13,8 +13,9 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./scripts/init-pagila.sh:/docker-entrypoint-initdb.d/01-init-pagila.sh
-      - ./sql/disparadores.sql:/docker-entrypoint-initdb.d/02-disparadores.sql
-      - ./sql/indices.sql:/docker-entrypoint-initdb.d/03-indices.sql
+      - ./sql/constraints.sql:/docker-entrypoint-initdb.d/02-constraints.sql
+      - ./sql/disparadores.sql:/docker-entrypoint-initdb.d/03-disparadores.sql
+      - ./sql/indices.sql:/docker-entrypoint-initdb.d/04-indices.sql
     ports:
       - "5432:5432"
     networks:

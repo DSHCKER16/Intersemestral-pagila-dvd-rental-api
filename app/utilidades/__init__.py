@@ -1,14 +1,14 @@
-# Paquete de Utilidades
-from .intentos import excute_isolated_tx, retry_tx
+from .reintentos import execute_isolated_tx, retry_tx
 from .transacciones import (
     run_serializable_transaction,
     run_read_committed_transaction,
 )
+from .errores import api_error
 
 __all__ = [
-    "excute_isolated_tx",
+    "execute_isolated_tx",
     "retry_tx",
     "run_serializable_transaction",
     "run_read_committed_transaction",
-    
+    "api_error",
 ]
