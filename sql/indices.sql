@@ -1,3 +1,7 @@
+CREATE UNIQUE INDEX IF NOT EXISTS idx_rental_inventory_active 
+ON rental (inventory_id) 
+WHERE return_date IS NULL;
+
 CREATE INDEX IF NOT EXISTS idx_rental_return_date ON rental(return_date);
 
 CREATE INDEX IF NOT EXISTS idx_rental_activas ON rental(inventory_id) WHERE return_date IS NULL;

@@ -3,7 +3,7 @@ from functools import lru_cache
 
 
 class Configuracion(BaseSettings):
-    DATABASE_HOST: str = "localhost"
+    DATABASE_HOST: str = "db"
     DATABASE_PORT: int = 5432
     DATABASE_NAME: str = "pagila"
     DATABASE_USER: str = "postgres"

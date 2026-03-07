@@ -13,9 +13,8 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./scripts/init-pagila.sh:/docker-entrypoint-initdb.d/01-init-pagila.sh
-      - ./sql/constraints.sql:/docker-entrypoint-initdb.d/02-constraints.sql
+      - ./sql/indices.sql:/docker-entrypoint-initdb.d/02-indices.sql
       - ./sql/disparadores.sql:/docker-entrypoint-initdb.d/03-disparadores.sql
-      - ./sql/indices.sql:/docker-entrypoint-initdb.d/04-indices.sql
     ports:
       - "5432:5432"
     networks:
@@ -34,6 +33,7 @@ services:
     container_name: pagila-api
     restart: unless-stopped
     environment:
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@db:5432/pagila
       DATABASE_HOST: db
       DATABASE_PORT: 5432
       DATABASE_NAME: pagila
