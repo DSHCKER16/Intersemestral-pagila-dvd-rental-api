@@ -1,7 +1,7 @@
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
 from sqlalchemy.exc import IntegrityError
-from app.errores import api_error
+from app.utilidades import api_error
 from app.esquemas import RentalCreate, RentalResponse
 
 def create_rental_serializable(conn: Connection, payload: RentalCreate) -> RentalResponse:

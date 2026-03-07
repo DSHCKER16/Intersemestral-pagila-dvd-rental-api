@@ -1,7 +1,7 @@
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
-from app.errores import api_error
 from app.esquemas import ReturnResponse
+from app.utilidades import api_error
 
 def registrar_devolucion_read_committed(conn: Connection, rental_id: int) -> ReturnResponse:
     q_sel = text("SELECT rental_id, return_date FROM rental WHERE rental_id = :r_id FOR UPDATE")

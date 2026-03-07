@@ -1,6 +1,4 @@
-# Utilidades de Manejo de Transacciones
-# TODO: Implementar context managers para diferentes niveles de aislamiento
-# TODO: READ COMMITTED, REPEATABLE READ, SERIALIZABLE
+
 from typing import Callable, TypeVar
 from sqlalchemy.engine import Connection
 from app.utilidades.reintentos import retry_tx

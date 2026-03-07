@@ -1,5 +1,3 @@
-from fastapi import FastAPI, status
-from fastapi.middleware.cors import CORSMiddleware
 from app.configuracion import obtener_configuracion
 from app.rutas import rentas, devoluciones, pagos
 

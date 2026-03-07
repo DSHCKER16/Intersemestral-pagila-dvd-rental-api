@@ -1,6 +1,6 @@
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
-from app.errores import api_error
+from app.utilidades import api_error
 from app.esquemas import PaymentCreate, PaymentResponse
 
 def create_payment_read_committed(conn: Connection, payload: PaymentCreate) -> PaymentResponse:
